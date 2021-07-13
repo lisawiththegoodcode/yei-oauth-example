@@ -1,10 +1,16 @@
 const express = require("express");
 const axios = require("axios");
-const { clientId, clientSecret, port, redirectUri } = require("./config");
+const {
+  baseUrl,
+  clientId,
+  clientSecret,
+  port,
+  redirectUri,
+} = require("./config");
 
 const app = express();
 
-const authUrl = `https://kazoorr270.rr.cs-demo.non-prod.kazoohr.io/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`;
+const authUrl = `${baseUrl}/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`;
 
 let accessToken;
 let refreshToken;
@@ -22,7 +28,7 @@ app.get("/auth/cb", async (req, res) => {
   console.log("CODE:", code);
   console.log("**************");
 
-  const authCodeUrl = `https://kazoorr270.rr.cs-demo.non-prod.kazoohr.io/oauth/token?code=${code}&redirect_uri=${redirectUri}&grant_type=authorization_code&scope=API&client_id=${clientId}&client_secret=${clientSecret}`;
+  const authCodeUrl = `${baseUrl}/oauth/token?code=${code}&redirect_uri=${redirectUri}&grant_type=authorization_code&scope=API&client_id=${clientId}&client_secret=${clientSecret}`;
 
   const { access_token, refresh_token } = await tokenRequest(authCodeUrl);
 
@@ -33,7 +39,7 @@ app.get("/auth/cb", async (req, res) => {
 });
 
 app.get("/auth/refresh", async (req, res) => {
-  const refreshUrl = `https://kazoorr270.rr.cs-demo.non-prod.kazoohr.io/oauth/token?grant_type=refresh_token&refresh_token=${refreshToken}`;
+  const refreshUrl = `${baseUrl}/oauth/token?grant_type=refresh_token&refresh_token=${refreshToken}`;
 
   const { access_token, refresh_token } = await tokenRequest(refreshUrl);
 
@@ -76,12 +82,9 @@ const tokenRequest = async (url) => {
 };
 
 const userRequest = async () => {
-  const { data } = await axios.get(
-    "https://kazoorr270.rr.cs-demo.non-prod.kazoohr.io/api/v3/users",
-    {
-      headers: { authorization: "Bearer " + accessToken },
-    }
-  );
+  const { data } = await axios.get(`${baseUrl}/api/v3/users`, {
+    headers: { authorization: "Bearer " + accessToken },
+  });
 
   return data;
 };
